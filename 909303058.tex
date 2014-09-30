@@ -1,0 +1,112 @@
+\documentclass[12pt,francais,english]{ulthese}
+\usepackage[utf8]{inputenc}
+\usepackage[gather]{chapterbib}
+\usepackage{amsmath}
+
+%\usepackage[round]{natbib}
+\usepackage{graphicx}
+\usepackage{todonotes}
+\usepackage{colonequals}
+\usepackage{mathtools}
+%\usepackage[pagewise]{lineno}
+\usepackage[running]{lineno}
+\usepackage{setspace}
+\usepackage[nostamp]{draftwatermark}
+\usepackage[ruled]{algorithm2e}
+\usepackage{booktabs}
+\usepackage{caption} 
+\usepackage[binary-units]{siunitx}
+\usepackage{microtype}
+\usepackage{subfig}
+\usepackage{rotating}
+\usepackage{float}
+
+\captionsetup[table]{skip=10pt}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+
+  %% Charger ici les autres paquetages nécessaires pour le document.
+  %% Quelques exemples; décommenter au besoin.
+  %\usepackage{amsmath}          % recommandé pour les mathématiques
+  %\usepackage{mathpazo}         % texte en Palatino
+  %\usepackage{mathptmx}         % texte en Times
+  %\usepackage[round]{natbib}
+
+
+%% Gestion des hyperliens dans le document. S'assurer que hyperref
+%% est le dernier paquetage chargé.
+\usepackage{hyperref}
+\hypersetup{colorlinks,allcolors=ULlinkcolor}
+
+  %% Options de mise en forme du mode français de babel. Consulter la
+  %% documentation du paquetage babel pour les options disponibles.
+  % \frenchbsetup{%
+  %   CompactItemize=false,         % ne pas compacter les listes
+  %   ThinSpaceInFrenchNumbers=true % espace fine dans les nombres
+  % }
+
+\titre{Synchronization of long- and short-term forest management planning\\in a sustainable development context}
+% \soustitre{Sous-titre le cas échéant}
+\auteur{Gregory Paradis}
+\programme{Doctorat en sciences forestières}
+\annee{2014}
+\PhD
+
+\bibliographystyle{plainnat}
+
+\begin{document}
+
+\frontmatter        
+\pagetitre
+
+\include{resume}
+\include{abstract}
+\cleardoublepage
+
+\tableofcontents  
+\cleardoublepage
+
+\listoftables         
+\cleardoublepage
+
+\listoffigures       
+\cleardoublepage
+
+\dedicace{To Jessi, without whom this would not have been nearly as much fun.}
+\cleardoublepage
+
+%\epigraphe{Engineers like to solve problems. If there are no problems handily available, they will create their own problems.}{Scott Adams}
+
+\epigraphe{If we are uncritical we shall always find what we want: we shall look for, and find, confirmations, and we shall look away from, and not see, whatever might be dangerous to our pet theories. In this way it is only too easy to obtain what appears to be overwhelming evidence in favor of a theory which, if approached critically, would have been refuted.}{Karl Popper}
+
+\cleardoublepage
+
+\include{acknowledgements}
+\include{preface} 
+
+\mainmatter            
+
+\include{introduction}
+\include{article1_chapter}
+\include{article2_chapter}
+\include{article3_chapter}
+\include{chapter3_chapter}
+\include{conclusion}   
+
+\appendix                  
+%\include{appendix_scenario-series_6-0}   
+%\include{appendix_scenario-series_6-1}   
+%\include{appendix_scenario-series_6-2x}   
+%\include{appendix_scenario-series_6-2y}   
+%\include{appendix_scenario-series_6-4}   
+%\include{appendix_scenario-series_6-5}
+%\include{appendix_scenario-series_6-6}   
+%\include{appendix_scenario-series_6-7}   % stochastic demand scenario... document not compiled yet
+   
+
+\bibliographystyle{plainnat}
+\bibliography{phd}  
+
+\end{document}

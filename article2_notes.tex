@@ -1,0 +1,166 @@
+
+
+
+% % \citet{paradis2013risk} show that the classic Model I (linear programming) wood supply optimization model formulation may, under certain circumstances, fail to ensure long-term sustainability of the fibre supply. This paper presents a bi-level extension of the classic model formulation, which aims to address this problem through explicit anticipation of industrial fibre consumption.
+
+% \citet{paradis2013risk} simulate the rolling-horizon wood supply problem as a two-phase planning process, which can be described from a game-theoretic point of view as an instance of the \emph{principal-agent problem}. In political science and economics, the principal–agent problem or agency dilemma concerns the challenge of motivating one party (the \emph{agent}), to act in the best interests of another (the \emph{principal}).
+
+% In a hierarchical forest management planning context, the \emph{principal} is a government steward of public forest land, and the \emph{agent} is the industrial network which is the main consumer of fibre harvested from the public forest. The principal wants to maximize harvest volume subject to even-flow constraints; the agent wants to maximize its short term profit. These objectives are not perfectly aligned (i.e., the agent may want to consume only a subset of maximum even-flow harvest volume) and hence the relationship is aptly described by the principal-agent paradigm.
+
+% \citet{paradis2013risk} describe a two-phase rolling-horizon simulation algorithm, which can be used to estimate long-term cumulative impact of repeated interaction between the principal and agent. At each iteration, the principal determines annual allowable cut (i.e., species-wise upper bound on agent consumption) in the first phase, and the agent consumes a profit-maximizing subset of annual allowable cut (AAC) in the second phase. They show that status quo formulation of the opimization model used by the principal to determine AAC (i.e., maximize harvest subject to species-wise even-flow constraints) may produce solutions that include a significant volume fibre that is unattractive to the agent. Systematic over-estimation of timber consumption in the principal’s model induces a form of systematic high-grading behaviour in the agent, which can compromise long-term sustainability of the wood supply. 
+
+% Based on these observations, we conjecture that modifying the wood supply model to explicitely anticipate agent wood consumption behaviour should reduce the gap between planning and executed harvesting activities, thereby mitigating the systematic drift effect and consequently improving stability of wood supply and credibility of principal’s assurances of long-term sustainability of forest management plans. This paper presents a bi-level extension of the classic model formulation, which aims to address this problem through explicit anticipation of industrial fibre consumption.
+
+
+% %Our algorithmic approach is based on the pioneer work of Fortuny-Amat and McCarl 1981[3] and Bard and Falk 1982[4].
+
+
+
+
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%
+
+% %, the solution methodology, the test dataset, and the computational experiment.
+
+% % Forest products companies are typically granted timber harvesting licences  
+
+% Model reformulations is based on the conjecture that explicit anticipation of optimal agent reaction to proposed wood supply plan may allow principal to exert greater
+% control over the proportion of wood supply that will be consumed in the first period. 
+% % Recall that we show in the first article that large
+% % disparity between proposed wood supply and actual harvest levels is
+% % associated with increased long-term instability of wood supply,
+% % decline of value-creation potential, and unplanned shifts in forest
+% % state (eg. species composition). 
+% We implement this as a bilevel bilinear program (BBP) \citep{dempe2003annotated}, where the top level (leader)
+% represents government wood supply planning process, and the lower
+% level (follower) represents value creation network (VCN) timber
+% consumption process. To the best of our knowledge, no BBP formulation
+% of the long-term wood supply planning problem has been published to
+% date.
+
+% The upper level model represents government. 
+% The lower level model represents the VCN. 
+% Implementation of both upper- and lower-level models is the same as in \citet{paradis2013risk}.
+
+% The objective of the bilevel optimization problem is to maximize long-term
+% even-flow wood supply, \emph{such that optimal reaction of the VCN is to entirely consume first-period wood supply}.
+% Implementation of this consumption constraint as a lower-level optimization problem (i.e., maximize VCN profit, given wood supply) induces the
+% bilevel optimization problem structure. 
+% % Tightness (i.e., level of satisfaction) of
+% % first-period consumption constraint can be controlled using upper and
+% % lower bounds $u$ and $l$, constraining proportion of wood supply that must
+% % be consumed in first period for the solution to be feasible.  We expect
+% % slacker bounds to yield higher long-term yield solutions.
+
+% \subsection{Bilevel Optimization Problem Formulation}
+
+
+
+
+
+
+
+
+% % We formulate the bilevel optimization problem as a combination of principal and agent optimization models. 
+
+% % The following sets are used in the formulations.
+
+% % \begin{description}
+% %      \item $\Omega$ : The set of all plans for the principal (forest owner)
+% % 	\item $\rho$ : The set of all plans for the agent (fibre consumer)
+% %    	\item $T$ : The set of all periods
+% % 	\item $Z$ : The set of spatial zones
+% %    	\item $P$ : The set of products
+% % \end{description}
+
+% % The following parameters are used in the formulations.
+
+% % \begin{description}
+% %    	\item $\gamma_{\theta z t p}$ : Quantity of product $p \in P$ generated in zone $z \in Z$ at period $t \in T$ by principal plan $\theta \in \Omega$
+% % 	\item $\alpha_{\phi z t p}$ : Quantity of product $p \in P$ used in zone $z \in Z$ at period $t \in T$ by agent plan $\phi \in \rho$
+% %    	\item $v_{\theta}$ : Value of principal plan $\theta \in \Omega$
+% %         %\item $V_{\theta}$ : Value of principal plan $\theta \in \Omega$ (??? fix me)
+% % 	\item $g_{\phi}$ : Value of agent plan $\phi \in \rho$
+% %         \item $c_{z t p}$ : Cost of underutilization of one unit of product $p \in P$ in zone $z \in Z$ at period $t \in T$
+% % \end{description}
+
+% % The following variables are used in the formulations.
+
+% % \begin{description}
+% %    	\item $x_{\theta} \in [0, 1]$ : The fraction of plan $\theta \in \Omega$ to be applied by the principal
+% % 	\item $y_{\phi}  \in [0, 1]$ : The fraction of plan $\phi \in \rho$ to be applied by the second agent
+% %    	\item $u_{z t p}$ : Quantity of product $p \in P$ underutilized in zone $z \in Z$ at period  $t \in T$
+% % \end{description}
+
+% % The principal optimization problem (P1) can be formulated as:
+
+% % \medskip
+% % \noindent 
+% % Maximize
+% % \begin{equation*}
+% % \sum_{\theta \in \Omega}v_{\theta}x _{\theta} - \sum_{\substack{z \in Z\\t \in T\\p \in P}}u_{z t p}
+% % \end{equation*}
+% % \begin{align}
+% % \intertext{Subject to}
+% % \sum_{\theta \in \Omega}x_{\theta} &=1\\
+% % u, x_{\theta} &\geq 0 
+% % \end{align}
+
+% % The agent optimization problem (P2) can be formulated as:
+
+% % \medskip
+% % \noindent 
+% % Maximize
+% % \begin{equation*}
+% % \sum_{\phi \in \rho}g_{\phi}y_{\phi}
+% % \end{equation*}
+% % \begin{align*}
+% % \intertext{Subject to}
+% % \sum_{\phi \in \rho}y_{\phi} &= 1\\
+% % \sum_{\phi \in \rho} \alpha_{\phi z t p} y_{\phi} + u_{z t p} &= \gamma_{\phi z t p} x_{\phi}, \forall z \in Z, t \in T, p \in P \\
+% % u, y_{\phi} &\geq 0 
+% % \end{align*}
+
+% % \pagebreak
+% % We can combine these two problems (P3) as follows:
+
+% % \medskip
+% % \noindent 
+% % Maximize
+% % \begin{equation*}
+% % \sum_{\theta \in \Omega}v_{\theta}x _{\theta} - \sum_{\substack{z \in Z\\t \in T\\p \in P}}u_{z t p}
+% % \end{equation*}
+% % \begin{align*}
+% % \intertext{Subject to}
+% % \sum_{\phi \in \rho}g_{\phi}y_{\phi} &\geq \sum_{\theta \in \Omega}V_{\theta}(x_{\theta}, \mu)x_{\theta}\\
+% % \sum_{\theta \in \Omega}x_{\theta} &=1\\
+% % \sum_{\phi \in \rho}y_{\phi} &= 1\\
+% % \sum_{\phi \in \rho}\left(\alpha_{\phi z t p} y_{\phi} + u_{z t p}\right) &= \sum_{\theta \in \Omega}\gamma_{\theta z t p} x_{\theta},\quad \forall z \in Z, t \in T, p \in P \\
+% % u, x_{\theta}, y_{\phi} &\geq 0
+% % \end{align*}
+
+% % The parameter $V_{\theta}(x_{\theta}, \mu)$ links upper and lower levels, and
+% % implicitely induces bilevel problem structure. 
+
+% \subsection{Solution Methodology}
+
+% We initially intended to solve $P3$ using an iterative column-generation solution method that uses
+% $P2$ and $P3$ problem formulations. Each iteration of the proposed
+% method can be decomposed into the following four-step process:
+% \begin{enumerate}
+% \item Generate column $\theta$ using $P3$ and $V_{\theta}(x_{\theta}, \mu)$ estimated from shadow prices of $P2$ and $P3$ solutions
+% \item Solve $P2(\theta)$ to obtain $V_{\theta}$ and shadow price of $P2$
+% \item Add $\theta$ to the basis of $P3$ and solve
+% \item Get shadow prices from $P3$ solution
+% \end{enumerate}
+
+
+
+% Describe solution method.
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "article2_article"
+%%% End: 

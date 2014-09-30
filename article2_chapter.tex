@@ -1,0 +1,43 @@
+\setcounter{secnumdepth}{3} 
+
+%\chapter{Extenting the Classic Woods Supply Model to Anticipate Industrial Fibre Consumption}
+\chapter{A Bilevel Model Formulation for the Distributed Wood Supply Problem}
+
+This chapter presents an article entitled \emph{A Bilevel Model Formulation for the Long-Term Wood Supply Problem}, submitted to the \emph{European Journal of Operational Research}. The authours are Gregory Paradis, Mathieu Bouchard, Luc LeBel, and Sophie D'Amours.
+
+\pagebreak
+
+\selectlanguage{francais}
+
+\begin{abstract}
+  French abstract goes here.
+\end{abstract}
+
+%\pagebreak
+
+\selectlanguage{english}
+
+\begin{abstract}
+    The classic wood supply optimization model maximizes sustainable (i.e., even-flow) harvest levels, and implicitly assumes infinite fibre demand.
+  In many jurisdictions, this modelling assumption is a poor fit for actual fibre consumption, which is often a species-unbalanced subset of total fibre allocation. 
+  Failure to anticipate this negative bias in volume and species mix of industrial wood fibre consumption has been linked to increased risk of future wood supply failure.
+  In particular, we examine the \emph{distributed wood supply planning problem}, which is a variant of the the general wood supply planning problem where roles of forest owner and fibre consumer are played by independent agents (for example, wood supply planning on public forest land in Canada, where government stewards control wood supply and forest products industry firms consume the fibre).
+  We use agency theory to describe the source of antagonism between public forest land owners (the \emph{principal}) and industrial fibre consumers (the \emph{agent}).
+  We show that the distributed wood supply planning problem can be modelled more accurately using a bilevel formulation, and present an extension of the classic wood supply optimization model which explicitly anticipates industrial fibre consumption behaviour.
+  The general case of the bilevel wood supply optimization problem is $\mathcal{NP}$-hard and non-convex; it is very difficult to solve to global optimality.   
+  By imposing certain restrictions on the topology of the lower-level problem, we show that the problematic general case can be decomposed into convex sub-problems.
+  We present a solution methodology that can solve this special case to global optimality, and compare output and solution times of classic and bilevel model formulations using a computational experiment on a realistic dataset.
+  Computational results show that solution time for the decomposed bilevel problem is comparable to solution time for the classic single-level problem, and that the bilevel formulation can completely eliminate the problematic fibre consumption bias.
+\end{abstract}
+
+\pagebreak
+
+\input{article2_body-merged}
+
+\bibliographystyle{plainnat}
+\bibliography{phd}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "909303058"
+%%% End: 

@@ -1,0 +1,582 @@
+\section{Introduction}
+\label{sec:introduction2}
+
+The relationship between forest land owner and industrial fibre consumer can sometimes be described as an instance of the \emph{principal-agent problem}.
+This is the case on public forest land in Canada, where government stewards manage the land and grant timber harvesting licenses to industrial fibre consumers.
+The classic Model I \citep{davis2001forest-ch13} wood supply model formulation is the \emph{de-facto} standard wood supply planning tool in many jurisdictions. 
+This classic model formulation finds the maximum indefinitely-sustainable\footnote{These models actually have a finite planning horizon. Typical rule-of-thumb horizon length choice would double the average timber rotation period. For example, a typical rotation period in the boreal forest is 75 years; a common wood supply model planning horizon is 150 years, discretized into 30 five-year periods. Planners assume that simulating sustainability over this horizon is sufficient to demonstrate indefinite sustainability.} harvest level, based on the implicit assumption that local fibre demand will always exceed supply.
+In other words, the classic model assumes that all available fibre will be consumed in every planning period, regardless of quantity, quality, cost, or value creation potential.
+In practice, this infinite-demand assumption is rarely respected.
+Consequently, the classic wood supply optimization model tends to systematically over-estimate fibre consumption. 
+
+In this context, \citet{paradis2013risk} show that the classic linear programming optimization model formulation may fail when potential fibre supply exceeds industrial demand, and recommend extending the classic wood supply model to explicitly anticipate industrial fibre demand. 
+This paper presents a novel bilevel extension of the classic formulation, which anticipates industrial fibre consumption behaviour.
+%We implement this recommendation using a bilevel model formulation.
+Our bilevel model finds the maximal species-wise even-flow wood supply levels that we anticipate will be entirely consumed by a profit-maximizing industrial fibre consumption agent, thereby reducing the magnitude of the negative fibre consumption bias (relative to the classic wood supply model formulation).  
+
+We show that the solution space induced by the bilevel reformulation is non-convex, which makes the general case difficult to solve exactly. 
+We proceed to describe a special case of the problem that can be solved to global optimality using a decomposition-based solution methodology. 
+Finally, we test our solution methodology on a dataset of realistic size and complexity, to demonstrate algorithmic convergence and problem tractability.
+
+\section{Background}
+\label{sec:background2}
+
+% \subsection{Wood Supply Planning}
+
+% \subsection{Principal-agent Problem}
+
+% \subsection{Bilevel Optimization}
+
+For management and planning purposes, the forest landscape is subdivided into \emph{stands}. 
+The \emph{stand} is the basic silviculture decision unit, and can be described as a contiguous forested area with uniform vegetation and growth characteristics. 
+Projection of future forest condition and fibre availability is based on aggregated result of stand-level growth and yield simulation. 
+This requires four distinct types of information: (a) hypothetical detailed inventory of current forest condition (i.e., stand ages and types), (b) hypothetical projection of stand condition over time for each type\footnote{Foresters typically refer to these as \emph{yield curves}.}, (c) hypothetical state transitions induced by stand events (i.e., shift in stand age and stand type), and (d) hypothetical intensity, location and timing of planned future stand events (e.g., clear-cut harvesting of stand $x$ in planning period $i$). 
+
+%High cost of collecting and compiling inventory, yield curve, and transition inputs is matched with heightened awareness of sampling error. 
+%Particular attention is paid to minimizing estimation bias \todo{Add references showing research on impact of wood supply model input error.}. 
+%Thus, estimation error tends to cancel out for the first three data types \citep{ouhimmou2010robust}. 
+
+Wood supply optimization models typically use the first three information types (i.e., starting inventory, yield curves, and state transitions) as input, leaving the fourth information type (location and timing of future stand events) as variables in the objective function. 
+%The c is often obtained from the output of wood supply optimization models. implicitly embedded in the objective function and constraints of the classic wood supply planning model. 
+%The implicit nature of the future harvest hypotheses on wood supply analysis has received relatively little attention in the literature. 
+Assembling this information into a coherent model, and subsequent analysis of model output, is referred to as the \emph{wood supply planning problem}. 
+We focus on a particular problem variant, which we call the \emph{distributed wood supply planning problem}, where the roles of forest land owner and industrial fiber consumer are played by independent agents. 
+This is a common situation in Canada and other jurisdictions, where public forest land is managed by government stewards on behalf of the general population.
+
+%\citet{paradis2013risk} present an illustrative case study showing that the common "maximal even-flow harvest volume" wood supply model formulation implicitly assumes that aggregate fibre industrial demand exceeds potential fibre supply throughout the planning horizon. This assumption does not hold in many instances. Using a two-phase iterative simulation, the authors show that systematic over-estimation of harvesting activity in this wood supply model formulation can have a negative impact on both credibility of long-term demonstration of sustainability and stability of industrial fiber supply.
+
+%Based on these findings, we propose to extend the "maximal even-flow harvest volume" wood supply model formulation to include explicit anticipation of industrial fibre consumption behaviour. 
+
+The classic wood supply planning model formulation 
+%(see \citet{paradis2013risk} for a detailed description of formulation) 
+does not explicitly consider industrial fibre-consumption behaviour. Instead, it implicitly assumes infinite demand (i.e., all harvested fiber will be consumed, regardless of quantity, quality, species, price, or other operational considerations). This assumption is not coherent with available data in some jurisdictions, where historical fibre consumption is systematically lower than maximum potential wood supply \citep{ccfm2005wood}.  This bias compromises the credibility of the classic wood supply optimization model as a rational basis for assurance of long-term sustainability of the forest ressource.
+
+We aim to improve the long-term wood supply planning model formulation by explicitly anticipating industrial fibre consumption behaviour. To do so, we can describe the distributed wood supply planning problem, from game-theoretic perspective, as an instance of the principal-agent problem. 
+% Stackelberg game \citep{stackelberg2010market, olsder2009phenomena}. 
+The role of \emph{principal} is played by the forest owner (or government steward), and the role of \emph{agent} is played by the industrial fibre consumer. 
+%Although we embed our model in an iterative simulation framework, we disregard the repeated nature of principal-agent interaction (i.e, we assume a static or ``one shot'' game, with no dynamic evolution of player behaviour induced by game repetition).
+%The principal wishes to offer the biggest perpetually-renewable wood supply contract possible. 
+%When the principal uses the classic wood supply optimization model, he fails to account for the agent's willingness to consume all the fibre offered.
+
+\section{Source of Antagonism}
+
+The principal has the long-term responsibility to ensure a sustained wood supply (hence the even-flow constraints in the wood supply model), but aims to maximize economic activity from exploitation of the forest resource (hence the wood-supply-maximization objective function).
+The agent aims to maximize short-term profit from transformation of wood supply into forest products.
+Antagonism between the principal and agent is linked to either (a) binding agent capacity constraints or (b) the presence of negatively-valued subsets of the wood supply. 
+Either of these factors will prevent the profit-maximizing agent from consuming the entire wood supply, which in turn induces the problematic negative consumption bias described in \citet{paradis2013risk}.
+
+The test dataset used in the computational experiments presented later in this paper features binding agent capacity constraints.
+Our test dataset has two lines (which we will refer to as \emph{hardwood} and \emph{softwood}, based on an aggregation of tree species that grow in our test forest).
+All the hardwood harvested from the forest must pass through a single hardwood sawmill.
+The hardwood sawmill capacity is approximately one third of the maximum sustainable hardwood supply level determined by the principal using the classic wood supply optimization model.
+The softwood line is profitable and has sufficient capacity to process the entire softwood supply offered by the principal.
+The agent therefore has an incentive to utilize his entire softwood allocation, but limit his hardwood consumption to the capacity of the hardwood sawmill.
+We have only permitted clear-cut harvesting in our test model, which means the agent only has take-all and leave-all options for each harvestable forest unit.
+In order to achieve the correct hardwood/softwood mix in his harvesting plan, the agent may select harvest units that have a lower proportion of hardwood than the harvest units appearing in the first period of the principal's optimal wood supply solution.
+This species-biased deviation from the principal's wood supply plan increases risk of future wood supply shortages.
+
+In the case of wood supply offers with negatively-valued subsets, the only way the principal has to motivate the agent to act is by allowing him to harvest part of the forest (i.e., the agent can choose to consume any subset of wood supply offered by the principal). 
+In practice, it is difficult (impossible) for the principal to force the agent to consume timber at a net loss, so this is a real problem. 
+The principal is incited to propose plans where part of the output is not interesting for the agent, as this allows him to increase his wood supply offer (this is desirable, given his objective function). 
+Including this negatively-valued part in the short-term wood supply allows the principal to increase the long-term wood supply offer\footnote{For example, harvesting relatively unproductive or over-mature parts of the forest and regenerating them into higher-productivity stands can sometimes increase the availability of fibre in a future time period. This \emph{allowable cut effect} is a well documented forest policy instrument. For more information, see \citet{luckert1995allowable}.}.
+However, the agent only plans his consumption on a short-term basis, therefore has no incentive to consume the negatively-valued subset of the wood supply.
+It may be impossible for the principal to offer the globally optimal plan \emph{and} force the agent to use all of the wood offered. 
+By not consuming the uninteresting part of the supply, the agent may compromise the principal's long term plan.
+
+We illustrate this second source of antagonism with an example. % (see Figure \ref{ref:stablestate}).
+Suppose the principal $P$ can offer $H_1$ to the agent $A$, which has a value $v(H_1) = 10M\$$. 
+To this offer, the principal can add $H_2$, which has a value $v(H_2) = 2M\$$.
+However, $H_1$ and $H_2$ can only be consumed sustainably if they are bundled with $H_3$, which has a value $v(H_3) = -1M\$$. 
+The best long-term solution for both parties is for the agent to consume $H_1$, $H_2$ and $H_3$ for $v(H_1 \cup H_2 \cup H_3) = 11M\$$.
+However, the principal knows that if he offers all three lots, the profit-maximizing agent will only take $H_1$ and $H_2$ for $v(H_1 \cup H_2) = 12M$.
+The principal knows that this is unsustainable, so he only offers $H_1$ which is sustainable but has a lower value of $10M\$$.
+
+Note that if the principal could bundle the uninteresting part with a more interesting surplus, then the antagonism would disappear.
+However, this bundling would require a more highly-constrained contract binding the agent to the principal.
+This bundling option is not typically available to the principal in practice, leaving him with no choice but to lower the wood supply offer until the agent willingly consumes it all.
+Determining the maximum species-wise even-flow wood supply offer that will be totally consumed by the agent is not a trivial problem.
+The antagonism between the two levels can induce non-convexity in the solution space, when we constrain the principal's problem such that a wood supply contract is principal-feasible only if the agent consumes it entirely.
+
+% \begin{figure}[h]
+%   \centering
+%   \includegraphics[width=50mm]{images/venn_stablestate}
+%   \caption{Illustration of stable state for principal and agent}
+%   \label{fig:stablestate}
+% \end{figure}
+
+\section{Non-Convexity of Bilevel Solution Space} 
+
+Before we present a formal mathematical formulation of the bilevel optimization problem, we provide a simple counter-example illustrating potential convexity problems (see Figure \ref{fig:counterexample}). The context for our counter-example is a simple setup where the principal offers a supply of hardwood and softwood to the agent. 
+The agent must willingly consume the entire wood supply offer for a given solution to be principal-feasible.
+
+The agent is actually composed of two independent sub-agents (softwood and hardwood lines). 
+This is similar to the test dataset used in the computational experiments we present later in this paper.
+Each sub-agent maximizes his own profit (i.e., is not willing to reduce his profit for the benefit of the other).
+There are three types of transformation processes: boards, paper, and cogeneration.
+The \emph{boards} process is equally profitable for both lines ($+50\,\si{\$\per\cubic\metre}$ for both softwood and hardwood), and has a transformation capacity of two input units for each line.
+The \emph{paper} process is profitable for both lines, but at different rates ($+50\,\si{\$\per\cubic\metre}$ for the softwood line, $+10\,\si{\$\per\cubic\metre}$ for the hardwood line); it has a transformation capacity of three input units for each line.
+The \emph{cogen} process is marginally profitable for for the softwood line ($+1\,\si{\$\per\cubic\metre}$), and marginally unprofitable for the hardwood line ($-1\,\si{\$\per\cubic\metre}$); it has a transformation capacity of one input unit for each line.
+
+Transforming inputs using the paper process requires utilization of a common resource for both lines.
+There is a difference in line-wise efficiency for utilization of the common resource.
+The softwood line utilizes two units of the common resource for each unit of input transformed, whereas the hardwood line is twice as efficient.
+Problems with non-convexity of the solution space may arise when this common resource becomes saturated.
+
+The counter-example starts with a solution offer of $4$ units of softwood and $4$ units of hardwood.
+The agent consumes the entire offer, for a profit of $\$320$. 
+Consider a slight perturbation that alters the solution by $+2$ units softwood and $-2$ units of hardwood; this produces the globally optimal solution, for a profit of $\$351$. 
+We will show that this $(+2S,-2H)$ bundled move, while still increasing the value for the agent, goes outside of the stable solution space.
+Next, consider a smaller perturbation that alters the solution by $+1$ unit of softwood and $-1$ unit of hardwood.
+In this case, the agent will not consume the entire offer (he will not consume the unprofitable unit of hardwood that would go to the cogen process).
+This is an infeasible solution from the perspective of the principal, as the bilevel model formulation requires the principal to consider only wood supply offers that will be entirely consumed by the agent.
+
+Even the simplest bilevel optimization problems are known to be $\mathcal{NP}$-hard, and non-convex solution spaces are common \citep{dempe2003annotated, colson2007overview}. 
+
+%\todo{Has this condition been clearly defined yet earlier in the text?}
+
+% The the prototype for this methodology was developed under the incorrect assumption that the solution space for combined problem P3 was convex.
+% In fact, the solution space for problem P3 is non-convex, which is common in bilevel programs \citep{dempe2003annotated}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{images/counterexample_edited2}
+  \caption{Simple cournter-example illustrating non-convexity of bilevel problem solution space}
+  \label{fig:counterexample}
+\end{figure}
+
+
+% From olsder2009phenomena:
+% In [13], one can for instance read: “It is a remarkable feature of these problems (i.e., contract design games) that the leader always takes all, pushing the follower to zero utility”.
+% 13. Selanie, B.: The Economics of Contracts. MIT Press, Cambridge (2000)
+%
+% This seems to be the case for our model as well; the principal pushes the agent to the break-even point in an effort to maximize AAC.
+
+%We show that tightening the gap between planned and implemented harvesting activities improves both credibility and performance of the distributed wood supply planning process.
+
+\section{Mathematical Formulation}
+\label{sec:formulation2}
+
+This section describes the bilevel optimization problem formulation. We use the bilevel programming terminology found in \citet{colson2007overview}.
+
+\subsection{General Case}
+
+We present a mathematical formulation for the general case. First, we define some symbols which will be used to formulate the principal and agent models.
+
+\begin{align*}
+\intertext{Let}
+\Theta &\colonequals  \text{set of extreme principal feasible solutions}\\
+\Phi &\colonequals  \text{set of extreme agent feasible solutions}\\
+O &\colonequals \text{the set of forest outputs}\\
+R &\colonequals \text{set of resources}\\
+\gamma_{\theta,o} &\colonequals \text{quantity of output $o \in O$ produced by the principal solution $\theta \in \Theta$}\\
+\alpha_{\phi,r} &\colonequals \text{quantity of resource $r \in R$ consumed by the agent solution $\phi \in \Phi$}\\
+\delta_{\phi,o} &\colonequals \text{quantity of output $o \in O$ consumed by the agent solution $\phi \in \Phi$}\\
+v_{\theta} &\colonequals \text{value of solution $\theta \in \Theta$ for the principal}\\
+w_{\phi} &\colonequals \text{value of solution $\phi \in \Phi$ for the principal}\\
+g_{\phi} &\colonequals \text{value of solution $\phi \in \Phi$ for the agent}\\
+u_r &\colonequals \text{maximal amount of resource $r \in R$}\\
+\intertext{represent the parameters, and}
+ x_{\theta} &\colonequals \text{proportion of the final principal solution built from principal solution $\theta \in \Theta$}\\
+y_{\phi} &\colonequals \text{proportion of the final agent solution built from agent solution $\phi \in \Phi$}\\
+\mu_o &\colonequals \text{dual price of output $o \in O$}\\
+\pi_r &\colonequals \text{dual price of resource $r \in R$}\\
+\intertext{represent the variables.}
+\end{align*}
+
+\begin{align} 
+  \intertext{The primal formulation of the agent's optimization problem is}
+    z_A(x) \colonequals \boldsymbol{\max} \sum_{\phi \in \Phi} g_{\phi} y_{\phi} \\
+    \shortintertext{\textbf{subject to} \nonumber} \\
+     \sum_{\phi \in \Phi} \alpha_{\phi,r} y_{\phi} & \leq u_r , & \forall r \in R \\
+     \sum_{\phi \in \Phi} \delta_{\phi,o} y_{\phi} & \leq d_o = \sum_{\theta \in \Theta} \gamma_{\theta,o} x_{\theta} , & \forall o \in O \\
+     \sum_{\theta \in \Theta} x_\theta & = 1 \\
+     \sum_{\phi \in \Phi} y_\phi & = 1 \\
+     y & \geq 0 \\
+    \intertext{The dual formulation of the agent's optimization problem is}
+   z_A(x) \colonequals \boldsymbol{\min} \sum_{r \in R} u_r \pi_r + \sum_{o \in O} d_o \mu_o \\
+    \shortintertext{\textbf{subject to} \nonumber} \\
+     \sum_{r \in R} \alpha_{\phi,r} \pi_r + \sum_{o \in O} \delta_{\phi,o} \mu_o & \geq  g_{\phi} , & \forall \phi \in \Phi \\
+    \pi, \mu & \geq 0 
+\end{align}
+
+The global solution is stable for both the principal and the agent if the following condition is met, expressing equality of output production (by the principal) and output consumption (by the agent).
+
+\begin{equation}
+\sum_{\phi \in \Phi} \delta_{\phi,o} y_{\phi}  = \sum_{\theta \in \Theta} \gamma_{\theta,o} x_{\theta}
+\end{equation}
+
+A stable formulation can be obtained by combining the primal and dual agent problems, and requiring equality on the output consumption constraint.
+
+\begin{align} 
+    z_A(x) \colonequals \boldsymbol{\max}  \sum_{\phi \in \Phi} g_{\phi} y_{\phi} \\
+    \shortintertext{\textbf{subject to} \nonumber} \\
+    \sum_{\phi \in \Phi} \alpha_{\phi,r} y_{\phi}  - s_r  & = u_r, & \forall r \in R \\
+    \sum_{\phi \in \Phi} \delta_{\phi,o} y_{\phi} & = \sum_{\theta \in \Theta} \gamma_{\theta,o} x_{\theta} , & \forall o \in O \\
+    \sum_{r \in R} \alpha_{\phi,r} \pi_r + \sum_{o \in O} \delta_{\phi,o} \mu_o - \sigma_\phi  & = g_{\phi} , & \forall \phi \in \Phi \\
+     s_r \pi_r & = 0 , & \forall r \in R \\
+    \sigma_{\phi} y_{\phi} & = 0 , & \forall \phi \in \Phi \\
+    \sum_{\theta \in \Theta} x_\theta & = 1 \\
+    \sum_{\phi \in \Phi} y_\phi & = 1 \\
+    y, \pi, \mu & \geq 0 
+\end{align}
+
+We can formulate the principal's optimization problem by modifying the objective function to express the sum of principal and agent solution values, from the perspective of the principal.
+
+\begin{align} 
+    z_A(x) \colonequals \boldsymbol{\max}  \sum_{\theta \in \Theta} v_{\theta} x_{\theta} + \sum_{\phi \in \Phi} w_{\phi} y_{\phi} \\
+    \shortintertext{\textbf{subject to} \nonumber} \\
+    \sum_{\phi \in \Phi} \alpha_{\phi,r} y_{\phi}  - s_r  & = u_r, & \forall r \in R \\
+    \sum_{\phi \in \Phi} \delta_{\phi,o} y_{\phi} & = \sum_{\theta \in \Theta} \gamma_{\theta,o} x_{\theta} , & \forall o \in O \\
+    \sum_{r \in R} \alpha_{\phi,r} \pi_r + \sum_{o \in O} \delta_{\phi,o} \mu_o - \sigma_\phi  & = g_{\phi} , & \forall \phi \in \Phi \\
+     s_r \pi_r & = 0 , & \forall r \in R \\
+    \sigma_{\phi} y_{\phi} & = 0 , & \forall \phi \in \Phi \\
+    \sum_{\theta \in \Theta} x_\theta = 1 \\
+    \sum_{\phi \in \Phi} y_\phi = 1 \\
+    y, \pi, \mu & \geq 0 
+\end{align}
+
+\subsection{Special Case}
+
+As discussed earlier, the general case for this bilevel problem is non-convex. 
+However, there is a special case of this problem, which we can solve to global optimality. 
+The non-convexity problems arrise in the agent's problem when at least one convergent node in the network has a saturated capacity constraint. 
+The special case is simply the inverse of the problematic case, and occurs in two types of instances: (a) strictly divergent networks, and (b) general networks with sufficient capacity at convergent nodes that these will not be saturated. 
+The first sub-case (i.e., strictly divergent flows) can be identified by analyzing network topology. 
+The second sub-case may only be observable through empirical analysis. 
+Figure \ref{fig:cases} illustrates these cases graphically. 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{images/cases}
+  \caption{Graphical illustration of problem cases}
+  \label{fig:cases}
+\end{figure}
+
+We present a mathematical formulation for the special case. First, we present a four additional parameter definitions
+
+\begin{align*}
+\Phi_o &\colonequals  \text{set of extreme agent feasible solutions for output $o \in O$}\\
+%\gamma_{\theta,o} &\colonequals \text{quantity of output $o \in O$ produce by the principal solution $\theta \in \Theta$}\\
+\alpha_{\phi_o,r} &\colonequals \text{quantity of resource $r \in R$ consumed by the agent solution $\phi_o \in \Phi_o$}\\
+\delta_{\phi_o,o} &\colonequals \text{quantity of output $o \in O$ consumed by the agent solution $\phi_o \in \Phi_o$}\\
+g_{\phi_o} &\colonequals \text{value of solution $\phi_o \in \Phi_o$ for the agent}\\
+\intertext{and a four additional variable definitions}
+y_{\phi_o} &\colonequals \text{proportion of the final agent solution built from agent solution $\phi_o \in \Phi_o$}\\
+\sigma_{\phi_o} &\colonequals \text{dual price of limit $o \in O$ for agent solution $\phi_o \in \Phi_o$} \\
+\mu_{\phi_o} &\colonequals \text{dual price of output $o \in O$ for agent solution $\phi_o \in \Phi_o$}\\
+\pi_r &\colonequals \text{dual price of resource $r \in R$}\\
+\end{align*}
+
+We can now formulate the special case of the agent's optimization problem as follows, decomposing the general case problem into output-wise subproblems.
+
+\begin{align} 
+  \intertext{The primal formulation of the agent's optimization problem is}
+    z_A(x) \colonequals \boldsymbol{\max} \sum_{o \in O} \sum_{\phi_o \in \Phi_o} g_{\phi_o} y_{\phi_o} \\
+    \shortintertext{\textbf{subject to} \nonumber} \\
+    \sum_{o \in O} \sum_{\phi_o \in \Phi_o} \alpha_{\phi_o,r} y_{\phi_o} & \leq u_r , & \forall r \in R \\
+    \sum_{\phi_o \in \Phi_o} \delta_{\phi_o,o} y_{\phi_o} & \leq 1 , & \forall o \in O \\
+    \sum_{\phi_o \in \Phi_o} y_{\phi_o} & \leq d_o = \sum_{\theta \in \Theta} \gamma_{\theta,o} x_{\theta} , & \forall o \in O \\
+    \sum_{\theta \in \Theta} x_\theta & = 1 \\
+    \sum_{\phi_o \in \Phi_o} y_\phi & = 1, & \forall o \in O\\
+    y & \geq 0\\
+    \intertext{The dual formulation of the agent's optimization problem is}
+   z_A(x) \colonequals \boldsymbol{\min} \sum_{r \in R} u_r \pi_r + \sum_{o \in O} d_o \mu_o \\
+    \shortintertext{\textbf{subject to} \nonumber} \\
+    \sum_{r \in R} \alpha_{\phi,r} \pi_r + \sum_{o \in O} \delta_{\phi,o} \mu_o & \geq  g_{\phi} , & \forall \phi \in \Phi \\
+    \pi, \mu & \geq 0 
+\end{align}
+
+Similarly to the general case, we can derive a bilevel problem formulation that is stable for both the principal and the agent, by requiring equality on the output consumption constraint.
+
+\begin{align} 
+    z_A(x) \colonequals \boldsymbol{\max}  \sum_{o \in O} \sum_{\phi_o \in \Phi_o} g_{\phi_o} y_{\phi_o} \\
+    \shortintertext{\textbf{subject to} \nonumber} \\
+    \sum_{o \in O} \sum_{\phi_o \in \Phi_o} \alpha_{\phi_o,r} y_{\phi_o}  - s_r  & = u_r, & \forall r \in R \\
+    \sum_{\phi_o \in \Phi_o} \delta_{\phi_o,o} y_{\phi_o} & = \sum_{\theta \in \Theta} \gamma_{\theta,o} x_{\theta} , & \forall o \in O \\
+    \sum_{o \in O} \sum_{r \in R} \alpha_{\phi_o,r} \pi_r + \sum_{o \in O} \delta_{\phi_o,o} \mu_o - \sigma_{\phi_o}  & = g_{\phi_o} , & \forall o \in O, \phi_o \in \Phi_o \\
+    s_r \pi_r & = 0 , & \forall r \in R \\
+    \sigma_{\phi_o} y_{\phi_o} & = 0 , & \forall \phi_o \in \Phi_o \\
+    \sum_{\theta \in \Theta} x_\theta & = 1 \\
+    \sum_{\phi_o \in \Phi_o} y_{\phi_o} & = 1 & \forall o \in O \\
+    y, \pi, \mu & \geq 0 
+\end{align}
+
+We can formulate the principal's optimization problem by modifying the objective function to express the sum of principal and agent solution values, from the perspective of the principal.
+
+\begin{equation} 
+    z_A(x) \colonequals \boldsymbol{\max} \sum_{o \in O} \sum_{\theta \in \Theta} v_{\theta} x_{\theta} + \sum_{\phi_o \in \Phi_o} w_{\phi_o} y_{\phi_o} \\
+\end{equation} 
+\begin{align} 
+    \shortintertext{\textbf{subject to} \nonumber} \\
+    \sum_{o \in O} \sum_{\phi_o \in \Phi_o} \alpha_{\phi_o,r} y_{\phi_o}  - s_r  & = u_r, & \forall r \in R \\
+    \sum_{\phi_o \in \Phi_o} \delta_{\phi_o,o} y_{\phi_o} & = \sum_{\theta \in \Theta} \gamma_{\theta,o} x_{\theta} , & \forall o \in O \\
+    \sum_{o \in O} \sum_{r \in R} \alpha_{\phi_o,r} \pi_r + \sum_{o \in O} \delta_{\phi_o,o} \mu_o - \sigma_{\phi_o}  & = g_{\phi_o} , & \forall o \in O, \phi_o \in \Phi_o \\
+    s_r \pi_r & = 0 , & \forall r \in R \\
+    \sigma_{\phi_o} y_{\phi_o} & = 0 , & \forall \phi_o \in \Phi_o \\
+    \sum_{\theta \in \Theta} x_\theta & = 1 \\
+    \sum_{\phi_o \in \Phi_o} y_{\phi_o} & = 1 & \forall o \in O \\
+    y, \pi, \mu & \geq 0 
+\end{align}
+
+
+\section{Solution Methodology}
+
+We originally set out to design an iterative solution methodology for the general case, based on the pioneer work of \citet{fortuny1981representation} and \citet{bard1982explicit}, however convexity issues limited this approach to local optimal solutions. 
+Consequently, we decided to focus our algorithmic development efforts on special cases which we could solve to global optimality.
+
+By limiting the problem domain to the special cases, we eliminate the possibility of interaction between outputs $o \in O$.
+The optimal solution to the lower-level problem can then be described as the sum of optimal solutions to output-wise sub-problems.  
+This property allows us to compute output-wise upper bounds on agent consumption behaviour.
+These upper bounds can subsequently be used to constrain the upper-level problem.
+This is the basis of our solution methodology for the special case.
+Algorithm \ref{alg:bilevel_specialcase} describes the solution methodology using pseudo-code.
+
+\vspace{12pt}
+\begin{algorithm}[H]
+  \DontPrintSemicolon
+  \SetKwInOut{Output}{Output}
+  \Output{Global optimal wood supply solution $x^*$}
+  \BlankLine
+  \ForEach{output $o \in O$} {
+    Determine upper bound $u_o = z_P^o$ on agent consumption of output $o$ (i.e., solve integrated sub-problem with all non-targeted outputs disabled). \;
+  }
+  \ForEach{output $o \in O$} {
+    Set upper bound constraint $\gamma_o \leq u_o$ on quantity of output $o$ produced by the upper level of the integrated master problem. \;
+  }
+  Solve integrated master problem. \;
+  \caption{Bilevel model solution algorithm (special case: no saturated joint capacity constraints)}
+  \label{alg:bilevel_specialcase}
+\end{algorithm}
+\vspace{12pt}
+
+Algorithm \ref{alg:bilevel_generalcase} describes an algorithm to solve the general case to global optimality by simple enumeration (i.e., iterates over the set of all possible convex subproblems, and returns the best solution). This algorithm is of limited practical interest, as computational effort required to solve realistically-sized instances by enumeration would be prohibitive. Efficiency of the general algorithm could potentially be improved by replacing subproblem enumeration with a custom branching algorithm taking advantage of problem structure, however we have not tested this.
+
+\vspace{12pt}
+\begin{algorithm}[H]
+  \DontPrintSemicolon
+  \SetKwInOut{Output}{Output}
+  \Output{Global optimal wood supply solution $x^*$}
+  \BlankLine
+  \ForEach{output $o \in O$}{
+    Generate subproblem (isolate output $o$ in lower-level problem). \;
+    Solve subproblem. \;
+    }
+  Sum subproblem solutions. \;
+  Build super-saturated process set $P_s$ (i.e., find violated capacity constraints). \;
+  \ForEach{combination of super-saturated process $p \in P_s$ and output $o \in O$} {
+    Generate subproblem (restrict certain combinations of output $o$ and process $p$). \;
+    Solve subproblem. \;
+    \If{subproblem feasible (i.e., no violated capacity constraint)} {
+        Add solution $x$ to feasible solution set $X$. \;
+    }
+  }
+  \Return{Global optimal solution $x^*$ (i.e., best solution in feasible set $X$).} \;
+  \caption{Bilevel model solution algorithm (general case: saturated joint capacity constraints)}
+  \label{alg:bilevel_generalcase}
+\end{algorithm}
+\vspace{12pt}
+
+The bilevel model can be solved to global optimality with relative ease when lower level input datasets have some special properties. 
+The test dataset used in our test simulations corresponds to special case 2.
+Special case 1 occurs if the product lines (i.e., outputs $o \in O$) in the lower level model are totally independent (i.e., strictly divergent). 
+Before elaborating further on this condition, we will describe the lower level data model in a bit more detail.
+
+The lower level data model can be described as a network of abstract processors connected by product flows.
+Figure \ref{fig:abstract_process} presents a graphical representation of an abstract processor node.
+An abstract process consumes inputs and resources, and produces outputs.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=70mm]{images/abstract_process}
+  \caption{Graphical representation of an abstract process}
+  \label{fig:abstract_process}
+\end{figure}
+ 
+At the upstream (source) end of this network is the interface between upper and lower level model. 
+Output from the first planning period in the upper level model (i.e., outputs $o \in O$) becomes input material that can be transformed by the lower-level network. 
+At the downstream (sink) end of the lower level network, external clients are willing to pay set unit prices to satisfy a bounded demand for each end product. 
+This end client demand enables the model to generate profits by pulling a subset of available fibre supply through the network to satisfy a (profit-maximizing) subset of end client demand.
+When raw upper-level model outputs are first pulled into the lower network, they must go through one of several front-line processor nodes that convert the raw wood supply into species-wise assortments of logs. 
+These front-line processors simulate the interface between the forest and the mills (i.e., the process of harvesting and delivering logs to mills in the network, including transportation cost, which can vary depending on the forest zone from which the raw volume inventory was picked).
+
+Raw upper-level volume is classified by species, and this species-wise distinction may (optionally) be maintained as the outputs are pulled into the lower-level network, depending on configuration of front-line processors. 
+For example, in the case of our test dataset, the front-line processors are configured to convert raw upper-level volume into assortments of either hardwood or softwood logs of various sizes \footnote{Our upper-level dataset uses a more fine-grained classification of tree species, which is aggregated into \emph{hardwood} and \emph{softwood} log types by the front-line processors.}.
+
+Due to the abstract nature of the lower-level processor implementation, it is possible to simulate any combination of divergent and convergent product flows. 
+Strictly divergent networks correspond to special case 1, and can be solved to global optimality using Algorithm \ref{alg:bilevel_specialcase}. 
+Special case 2 occurs when the network includes convergent product flows, but no joint capacity constraints are saturated. 
+Although somewhat more difficult to detect, special case 2 is not problematic and can also be solved to global optimality using Algorithm \ref{alg:bilevel_specialcase}.
+For special cases 1 and 2, each product line $o \in O$ can be treated as an independent subproblem. 
+The optimal value of $z_{A_o} (x)$ for output $o$ is equal to the $\argmax_{v_o} p(v_o)$, where $p(v_o)$ is a concave function describing profit for any non-negative consumption volume $v_o$ (see Figure \ref{fig:pvo}). 
+%This corresponds to the maximum volume that the agent can be expected to consume for a given product line $o$, which we use as an upper bound on harvest level for product line $o$ in the final step of Algorithm \ref{alg:bilevel_specialcase}. 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{images/pvo}
+  \caption{Illustration of concave profit function of a hypothetical product $o$}
+  \label{fig:pvo}
+\end{figure}
+
+%For special cases 1 and 2, the profit functions are implicitly embedded in the dataset. 
+The product-wise subproblems can be represented using the lower-level model by disabling all non-targeted outputs\footnote{Non-targeted outputs can be disabled by manipulating input parameters of the upper level model, setting conversion efficiency and conversion cost of front-line processors to null values. Instead of converting wood supply units to log assortments, the modified front-line processors now consume all non-targeted outputs at zero cost, which blocks non-targeted outputs from further flow through the lower-level model network.}. 
+We can then easily solve each subproblem to obtain the optimal sub-problem solutions without having to explicitly locate intermediate inflection points of profit function $p(v_o)$. 
+This corresponds to the maximum volume that the agent can be expected to consume for a given output $o$, which we use as an upper bound on harvest level for output $o$ in the final step of Algorithm \ref{alg:bilevel_specialcase}.
+
+Note that output from our bilevel model is structurally identical to output from the classic model (i.e., output-wise upper bounds on harvest levels, bundled with required levels of pre-commercial sylviculture treatments). 
+Thus, our bilvel model can potentially be used as a drop-in replacement for the single level model.
+\todo[author=Greg, inline]{Is this really not clear?}
+%We test this using a case study, which we describe in the next section.
+
+\section{Computational Experiment}
+
+We implemented our bilevel methodology within the simulation framework presented in \citet{paradis2013risk}. This framework models wood procurement planning as a two-phase process, and allows us to simulate interaction between the principal and the agent.
+
+\subsection{Description of Dataset}
+
+We tested our bilevel solution methodology on a realistic synthetic dataset from Quebec, Canada.
+Output from the upper-level (forest) model is aggregated into two outputs: \emph{softwood} and \emph{hardwood}. 
+The lower-level (industrial) model has limited capacity for transforming hardwood (approximately $1/3$ of potential sustainable wood supply). 
+%The upper level model has a single (clearcut) harvest treatment implemented, which has the effect of ``bundling'' hardwood and softwood together in the upper-level model solution.
+%A combination of limited hardwood processing capacity in the lower level and output bundling in the upper level indirectly constrains softwood consumption in the lower level.
+The classic wood supply model therefore systematically over-estimates short-term hardwood fibre consumption.
+
+% We have not thus far succeeded in developing a solution methodology that guarantees convergence on global optimality for the general convergent case with saturated capacity constraints 
+% However, we have developed an iterative solution methodology that we believe could converge on locally optimal solutions in a finite number of iterations. 
+% Our methodology for the general case relies on iterative shadow price feedback from the lower level to guide selection of new columns to add to the basis in a column-generation--based algorithm embedded in the upper level. 
+% We have not yet implemented or tested the solution methodology for the general case.
+
+%See \citep{paradis2013risk} for a detailed description of case study dataset.  
+We use the same test dataset as in \citet{paradis2013risk}, which is an instance of special case 2. Although chip flows from both hardwood and softwood sawmills converge at the pulp mill, we have determined empirically that its capacity is sufficient to avoid saturation problems.
+
+
+\subsection{Experimental Methodology}
+
+We present a computational experiment using two scenarios (control and test). 
+The purpose of the computational experiment is to show convergence of our solution methodology, and to compare solution times (i.e., computational effort) between control and test scenarios.
+
+The \emph{control} scenario corresponds to the \emph{status quo} (i.e., our best attempt at simulating current principal and agent behaviour).
+The \emph{test} scenario uses the bilevel model (instead of the classic model) to simulate the principal's behaviour in the first stage of each planning cycle; all other parameters are held constant. 
+%The purpose of the computational experiment is to show that our solution methodology for the special case of the bilevel problem converges quickly on a globally optimal solution, using a dataset of realistic size and complexity.
+
+For each planning cycle, principal and agent each get to make their move sequentially. 
+First the principal maximizes even-flow wood supply (30-period horizon), then the agent maximizes first-period profits (1-period horizon).
+%Planning horizon length is 30 periods for the first (principal) phase, and 1 period for the second (agent) phase.  
+Planning period length is 5 years.
+The test scenarios presented in this paper show results from a single two-phase planning cycle.
+
+Note that we simulate \emph{perfect} anticipation of agent behaviour, by using identical model formulations for both the agent-anticipation mechanism (in the first phase of the simulation) and the agent-execution mechanism (in the second phase of the simulation).
+This helps clearly illustrate convergence of the solution methodology under best-case conditions.
+
+%We present results from a single cycle of the two-phase wood supply planning problem (i.e., principal determines sustainable wood supply, agent consumes profit-maximizing subset of the wood supply).  
+
+%Long-term effect of the bilevel formulation, after repeated planning cycles, will be presented in a future publication. 
+
+
+\section{Results}
+\label{sec:results2}
+
+Figure \ref{fig:scenarios} presents results from control and test scenarios.
+ 
+For the control scenario, potential hardwood fibre supply is 64\,583\,\si{\cubic\metre}, whereas actual consumption is only 20\,800\,\si{\cubic\metre}.
+The difference between planned and executed hardwood fibre consumption volumes is due to the limited processing capacity at the (single) hardwood sawmill in the lower-level model.
+The entire softwood fibre supply is consumed by the agent, as we would expect, as both end-product demand and processing capacity for the softwood line are high enough to accommodate more softwood fibre than the forest can supply. 
+This phenomenon (of consuming certain components of the wood supply entirely while other components are only partially consumed) can be observed to varying extents in practice, where processing capacity and market demand are often misaligned with the proposed wood supply.
+
+In order to harvest the full softwood supply volume while only harvesting a third of the hardwood supply, the agent must favour forest stands that have a high proportion of softwood (low proportion of hardwood).
+The wood supply model is sensitive to deviation from the timing and location of harvesting activities prescribed in the first period of the optimal solution.
+Even slight deviations from the optimal solution carry a high risk of rendering the solution infeasible (from the perspective of the principal, in the form of wood supply shortages) in future periods.   
+This is inherently problematic, as the optimal solutions from wood supply models were never intended to be implemented as-is\footnote{Intended usage of wood supply model solutions is limited to estimating species-wise upper bounds on short-term timber licence allocations, such that long-term sustainability of the wood supply is not irreversibly compromised.
+Producing an operationally feasible fibre procurement plan (including access road construction and maintenance, harvesting, transportation, and follow-up silviculture treatments) from the first period of the wood supply plan requires considerable dis-aggregation and refinement.}.
+
+%\footnote{Wood supply modelling is considered a long-term planning exercise. Consequently, wood supply models are highly simplified representations of the complex interactions between forest growth and anthropogenic disturbances (i.e., harvesting). Input data is highly aggregated.}
+
+Thus, minimizing the gap between planned and executed harvesting volume should help reduce the risk of future wood supply failures.
+The primary motivation for developing the bilevel model formulation presented here is to proactively mitigate selective wood supply consumption behaviour. 
+We implement this idea by embedding explicit anticipation of industrial fibre consumption into the wood supply model, such that the principal offers the maximal sustainable wood supply that will be entirely consumed by the agent. 
+Re-defining the wood supply problem in this way improves the quality of linkage between strategic and tactical planning levels.
+
+%Although the upper-level wood supply model uses a 30-period horizon to predict future wood supply, these model are typically used on a 1-period rolling-horizon (i.e., the model is re-run at the beginning of each planning period). 
+
+Test scenario results show that our bilevel anticipation mechanism completely eliminates over-estimation of hardwood fibre consumption. 
+Fibre consumption by the agent is exactly equal to wood supply volumes offered by the principal (20\,800\,\si{\cubic\metre} for hardwood, and 323\,759\,\si{\cubic\metre} for softwood ).
+This is the desired outcome from the bilevel model, and represents a global optimal solution for this instance.
+%, given that our test dataset is an instance of special case 2 (i.e., convergent network with non-saturated shared resource). 
+
+\begin{figure}[Ht!]
+  \centering
+  \medskip
+  \includegraphics[width=\textwidth]{images/article2_compbar}
+  \caption{Comparison of planned and executed volumes}
+  \label{fig:scenarios}
+\end{figure}
+
+Table \ref{tab:scenarios} presents intermediate results from each step of the bilevel solution method (see Algorithm \ref{alg:bilevel_specialcase}) for the test scenario.
+We present this data to show how we derive the optimal upper bounds to the wood supply problem from solutions to output-wise sub-problems.
+Hardwood consumption capacity (20\,800\,\si{\cubic\metre}) is the binding constraint in this case. 
+Our anticipation mechanism shows that the softwood line could have profitably consumed up to 584\,861\,\si{\cubic\metre} of softwood in the first planning period, however the species-wise even-flow constraints on the upper-level wood supply model limit long-term softwood harvest level to 323\,759\,\si{\cubic\metre}.
+As expected, the agent's fibre consumption volume in the second phase of the simulation is exactly equal to the wood supply.
+This shows that the bilevel model eliminates the gap between planned and executed fibre consumption levels, thereby fulfilling its intended purpose.
+
+\begin{table}
+\caption{Bilevel solution method Intermediate results}
+\label{tab:scenarios}
+\renewcommand{\tabcolsep}{2pt}
+\begin{tabular}{llrr}
+\toprule 
+Phase & Description & \multicolumn{2}{c}{Volume (\si{\cubic\metre})} \tabularnewline
+&& Hardwood & Softwood \tabularnewline
+\midrule
+1 (principal) & Upper bound on \emph{hardwood} consumption & 20\,800 & - \tabularnewline
+1 (principal) & Upper bound on \emph{softwood} consumption & - & 584\,861 \tabularnewline
+1 (principal) & Maximum even-flow wood supply levels & 20\,800 & 323\,759 \tabularnewline
+2 (agent) & Agent fibre consumption & 20\,800 & 323\,759 \tabularnewline
+\bottomrule
+\end{tabular}
+\end{table}
+
+The classic model can be solved in a single step.
+This corresponds to approximately 13 seconds of CPU time for our test setup.
+For the test scenario, the bilevel model requires $\left|O\right| + 1$ steps to solve.
+This corresponds to approximately $(4 + 6) + 10$ seconds of CPU time using our test setup.
+We ran our tests on an Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} E5-2670 processor (20\,\si{\mega\byte} cache, 2.60 \si{\giga\hertz}).
+
+Although our computational experiment is conducted using a dataset from Quebec, Canada, our bilevel model concept could be applied to wood supply planning problems in other jurisdictions with similar context (i.e., distributed planning environment with fibre demand). The concept could also be extended to other industries where a distributed, sequential planning process requires anticipation of downstream planning processes. For example, a bilevel modelling approach has recently been used to analyse fisheries quota policies \citep{vandijk2014solving}.
+ 
+
+\section{Conclusion}
+\label{sec:conclusion2}
+
+\citet{paradis2013risk} conclude that the classic wood supply model formulation should be extended to anticipate industrial fibre consumption. 
+We frame this problem using agency theory, and propose mathematical formulations to describe the optimization problems of the principal and the agent. 
+We then combine principal and agent problems into a bilevel optimization model. 
+
+Using a counter-example, we show that the general case of the bilevel problem is non-convex.
+We present a solution algorithm to solve the general case to global optimality, through enumeration of feasible solutions.
+However, an enumeration-based strategy is computationally intractable for realistically-sized instances.
+By imposing a restrictive condition on the topology of the agent's problem, we isolate a special case of the bilevel problem. The special case can be decomposed into output-wise convex subproblems.
+We present a decomposition-based solution algorithm that solves the special case to global optimality.
+
+In practice, many networks correspond to the special case. 
+Problematic cases can always be modelled as instances of special case 2, by relaxing binding capacity constraints on convergent nodes such that the shares resources are not saturated.
+In many instances, the benefits of explicitly anticipating the agent's behaviour will far out-weight any negative side-effects from the aforementioned capacity constraint relaxations.
+
+Lastly, we test our solution methodology on a test dataset of realistic size and complexity, and compare results to output from the classic (single-level) wood supply optimization model. 
+Results show that the bilevel solution algorithm for the special case converges on a global optimal solution in less than twice the time required to solve the classic (single-level) model formulation.
+Considering that these wood supply models need only be solved once every 5 years, this increase in solution time is deemed insignificant.
+Our extended wood supply model formulation was designed as a potential drop-in replacement for the classic model.  
+
+A more in-depth analysis of principal-agent interaction under bilevel modelling will be presented in an upcoming publication. Further computational experiments will compare long-term effect of using our bilevel model formulation (after repeated rolling-horizon planning cycles) on magnitude and stability of the wood supply.
+
+
+\section{Acknowledgements}
+\label{sec:acknowledgements2}
+
+This study was supported by funding from the \emph{FORAC Research
+  Consortium} and the \emph{Fonds de recherche du Qu\'{e}bec -- Nature
+  et technologies}. 
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "909303058"
+%%% End: 
